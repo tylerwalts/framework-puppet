@@ -1,0 +1,4 @@
+// Example of empty host-specific config.
+// Use this FQDN scope as last resort only, for outliers.
+{
+}
