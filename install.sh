@@ -27,18 +27,27 @@ function copyAndTag {
 }
 function symLink {
     filename=$1
-    sourceFile=$frameworkPath/$filename
+    filenameOnly=$(basename "$filename")
+    relativePath="${filename%/*}"
+    if [[ "$filenameOnly" == "$relativePath" ]]; then
+        relativePath=""
+    else
+        pathCount="$( echo $relativePath | grep -o '/' | wc -l)"
+        relativePath=""
+        while [[ "$pathCount" != "-1" ]]; do
+            relativePath="${relativePath}../"
+            (( pathCount-- ))
+        done
+    fi
+    sourceFile="${relativePath}.framework-puppet/$filename"
     destFile=$targetPuppetPath/$filename
-    # If existing target is a file, skip it, means project has customized it.
-    if [[ -f $destFile ]]; then
-        # If existing target is a symlink, delete and recreate it.
-        if [[ -h $destFile ]]; then
-            echo "- Updating symlink: $filename"
-            rm $destFile
-            ln -s $sourceFile $destFile
-        else
-            echo "* Skipping existing file in place of symlink (customized for project): $destFile"
-        fi
+    if [[ -h $destFile ]]; then
+        echo "- Updating symlink: $filename"
+        rm $destFile
+        ln -s $sourceFile $destFile
+    elif [[ -e $destFile ]]; then
+        # If existing target is a file, skip it, means project has customized it.
+        echo "* Skipping existing file in place of symlink (customized for project): $destFile"
     else
         echo "Linking: $filename"
         ln -s $sourceFile $destFile
