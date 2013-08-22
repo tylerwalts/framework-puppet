@@ -7,28 +7,44 @@
 #
 
 frameworkPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-targetPuppetPath="$( cd "$sprintZeroPath/../" && pwd )"
+targetPuppetPath="$( cd "$frameworkPath/../" && pwd )"
 
 # Get version of this repository that we're working with, to tag copies.
-frameworkSource="$(cat .git/HEAD) on $(date +%Y-%m-%d_%H%M)"
+# Assumes this was installed using the sprint-zero framework
+frameworkSource="$(cat ../../../.git/modules/tools/puppet/.framework-puppet/HEAD) on $(date +%Y-%m-%d_%H%M)"
 function copyAndTag {
     filename=$1
     sourceFile=$frameworkPath/$filename
     destFile=$targetPuppetPath/$filename
-    [[ -f $destFile ]] && echo "FAIL: file exists: $destFile" && exit 1
-    command="cp $sourceFile $destFile"
-    echo "command=$command"
-    $command
-    echo "#$frameworkSource" >> $destFile
+    if [[ -f $destFile ]]; then
+            echo "* Skipping existing template: $destFile"
+    else
+        echo "Copying: $filename"
+        command="cp $sourceFile $destFile"
+        $command
+        echo "#$frameworkSource" >> $destFile
+    fi
 }
 function symLink {
     filename=$1
     sourceFile=$frameworkPath/$filename
     destFile=$targetPuppetPath/$filename
-    [[ -f $destFile ]] && echo "FAIL: file exists: $destFile" && exit 1
-    command="ln -s $sourceFile $destFile"
-    echo "command=$command"
-    $command
+    # If existing target is a file, skip it, means project has customized it.
+    if [[ -f $destFile ]]; then
+        # If existing target is a symlink, delete and recreate it.
+        if [[ -h $destFile ]]; then
+            echo "- Updating symlink: $filename"
+            rm $destFile
+            ln -s $sourceFile $destFile
+        else
+            echo "* Skipping existing file in place of symlink (customized for project): $destFile"
+        fi
+    else
+        echo "Linking: $filename"
+        ln -s $sourceFile $destFile
+        # Add to .gitignore : Every new checkout will need to run this script.
+        [[ "$(grep $filename $targetPuppetPath/.gitignore)" == "" ]] && echo "$filename" >> $targetPuppetPath/.gitignore
+    fi
 }
 
 echo "Installing puppet framework into project repository...
@@ -43,15 +59,15 @@ mkdir -p $targetPuppetPath/lib \
     $targetPuppetPath/manifests/config/hosts \
     $targetPuppetPath/manifests/config/roles \
     $targetPuppetPath/modules/general/manifests
+touch $targetPuppetPath/.gitignore
 
 copyAndTag Puppetfile
 symLink    lib/.gitignore
 symLink    manifests/config/common.json
-copyAndTag manifests/config/domains/clientdomain.tld.json
-copyAndTag manifests/config/domains/clientname.slalomcloud.us.json
-copyAndTag manifests/config/hosts/examplehost.clientname.slalomcloud.us.json
+copyAndTag manifests/config/domains/example.json
+copyAndTag manifests/config/hosts/example.json
 copyAndTag manifests/config/project.json
-copyAndTag manifests/config/roles/app.json
+copyAndTag manifests/config/roles/example.json
 copyAndTag manifests/defines.pp
 symLink    manifests/hiera.yaml
 symLink    manifests/site.pp
@@ -59,8 +75,8 @@ symLink    modules/general/manifests/init.pp
 symLink    run_puppet_apply.sh
 symLink    update_library.sh
 
-echo "Adding puppet templates and links to project repository..."
-$(cd ../ && git add *)
+echo -e "\nAdding puppet templates and links to project repository...\n"
+$(cd ../ && git add .gitignore *)
 echo -e "Remember to review & commit git changes:\n\tcd ..\n\tgit status\n\tgit diff\n\tgit commit -m 'Added puppet framework artifacts'\n\tgit push\n"
 
 # TODO:  prompt for common stack components: (tomcat, mysql, apache, node.js, mongo)

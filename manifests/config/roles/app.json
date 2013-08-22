@@ -1,7 +1,0 @@
-// Example of a server role
-{
-  "classes":[
-    // Role-specific classes
-  ]
-  // Role-specific parameters and/or overrides
-}
