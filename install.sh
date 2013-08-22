@@ -23,6 +23,7 @@ function copyAndTag {
         command="cp $sourceFile $destFile"
         $command
         echo "#$frameworkSource" >> $destFile
+        copiedFileList=" $filename"
     fi
 }
 function symLink {
@@ -68,8 +69,11 @@ mkdir -p $targetPuppetPath/lib \
     $targetPuppetPath/manifests/config/hosts \
     $targetPuppetPath/manifests/config/roles \
     $targetPuppetPath/modules/general/manifests
-echo "# These are symbolic links maintained by the puppet framework" >> $targetPuppetPath/.gitignore
-echo "lib" >> $targetPuppetPath/.gitignore
+
+[[ "$(grep 'maintained' $targetPuppetPath/.gitignore)" == "" ]] && \
+    echo "# These are maintained by the puppet framework" >> $targetPuppetPath/.gitignore
+[[ "$(grep -e '^lib$' $targetPuppetPath/.gitignore)" == "" ]] && \
+    echo "lib" >> $targetPuppetPath/.gitignore
 
 copyAndTag Puppetfile
 symLink    manifests/config/common.json
@@ -85,9 +89,12 @@ symLink    modules/general/manifests/init.pp
 symLink    run_puppet_apply.sh
 symLink    update_library.sh
 
-echo -e "\nAdding puppet templates and links to project repository...\n"
-$(cd ../ && git add .gitignore *)
-echo -e "Remember to review & commit git changes:\n\tcd ..\n\tgit status\n\tgit diff\n\tgit commit -m 'Added puppet framework artifacts'\n\tgit push\n"
+gitStatus=$(cd ../ && git status Puppetfile | grep nothing | wc -l | tr -d ' ' )
+if [[ "$gitStatus" != "1" ]]; then
+    echo -e "\nAdding puppet templates and links to project repository...\n"
+    $(cd ../ && git add .gitignore $copiedFileList)
+    echo -e "Remember to review & commit git changes:\n\tcd ..\n\tgit status\n\tgit diff\n\tgit commit -m 'Added puppet framework artifacts'\n\tgit push\n"
+fi
 
 # TODO:  prompt for common stack components: (tomcat, mysql, apache, node.js, mongo)
 # - Add modules to Puppetfile and put entry in project.json
