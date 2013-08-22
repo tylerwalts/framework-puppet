@@ -16,7 +16,9 @@ function copyAndTag {
     sourceFile=$frameworkPath/$filename
     destFile=$targetPuppetPath/$filename
     [[ -f $destFile ]] && echo "FAIL: file exists: $destFile" && exit 1
-    cp $sourceFile $destFile
+    command="cp $sourceFile $destFile"
+    echo "command=$command"
+    $command
     echo "#$frameworkSource" >> $destFile
 }
 function symLink {
@@ -24,7 +26,9 @@ function symLink {
     sourceFile=$frameworkPath/$filename
     destFile=$targetPuppetPath/$filename
     [[ -f $destFile ]] && echo "FAIL: file exists: $destFile" && exit 1
-    ln -s $sourceFile $destFile
+    command="ln -s $sourceFile $destFile"
+    echo "command=$command"
+    $command
 }
 
 echo "Installing puppet framework into project repository...
@@ -56,16 +60,8 @@ symLink    run_puppet_apply.sh
 symLink    update_library.sh
 
 echo "Adding puppet templates and links to project repository..."
-$(cd ../tools/puppet && git add *)
-
-read -p "Do you want to automatically commit and push to your project repo?" commitRepo
-if [[ "$commitRepo" == "y" ]]; then
-    cd ..
-    git commit -m 'Added puppet framework artifacts'
-    git push
-else
-    echo -e "Remember to review git changes:\n\tcd ..\n\tgit status\n\tgit diff\n\tgit commit -m 'Added puppet framework artifacts'\n\tgit push\n"
-fi
+$(cd ../ && git add *)
+echo -e "Remember to review & commit git changes:\n\tcd ..\n\tgit status\n\tgit diff\n\tgit commit -m 'Added puppet framework artifacts'\n\tgit push\n"
 
 # TODO:  prompt for common stack components: (tomcat, mysql, apache, node.js, mongo)
 # - Add modules to Puppetfile and put entry in project.json
