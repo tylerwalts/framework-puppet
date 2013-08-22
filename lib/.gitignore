@@ -1,7 +1,0 @@
-
-# This directory is managed by puppet librarian, so keep it empty in git
-
-*
-!.gitignore
-
-

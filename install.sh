@@ -69,9 +69,9 @@ mkdir -p $targetPuppetPath/lib \
     $targetPuppetPath/manifests/config/roles \
     $targetPuppetPath/modules/general/manifests
 echo "# These are symbolic links maintained by the puppet framework" >> $targetPuppetPath/.gitignore
+echo "lib" >> $targetPuppetPath/.gitignore
 
 copyAndTag Puppetfile
-symLink    lib/.gitignore
 symLink    manifests/config/common.json
 copyAndTag manifests/config/domains/example.json
 copyAndTag manifests/config/hosts/example.json
