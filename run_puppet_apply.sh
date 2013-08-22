@@ -1,6 +1,6 @@
 #!/bin/bash
 [[ "$EUID" != "0" ]] && echo -e "\nError:\n\t**Run this script as root or sudo.\n" && exit 1
-basedir="$( dirname $( readlink -f "${0}" ) )"
+basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 
 function usagePrompt {
