@@ -71,7 +71,7 @@ copyAndTag manifests/config/roles/example.json
 copyAndTag manifests/defines.pp
 symLink    manifests/hiera.yaml
 symLink    manifests/site.pp
-symLink    manifests/global.pp
+symLink    manifests/globals.pp
 symLink    modules/general/manifests/init.pp
 symLink    run_puppet_apply.sh
 symLink    update_library.sh
