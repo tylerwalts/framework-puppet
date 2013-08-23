@@ -3,13 +3,16 @@ framework-puppet
 
 This is a framework for developing projects using puppet.
 
-It will initially get called by the sprint-zero installer, and will get installed in your project's repository at `tools/puppet/.framework-puppet` and by every user each time a new code is checked out or if the working directory is moved and the symlinks need to get updated.
+It will initially get called by the sprint-zero installer, and will get installed as a submodule in your project's repository at `tools/puppet/.framework-puppet`.
+
+Run this each time new code is checked out to update the framework:
 
 ```bash
     # From the root of your project repository:
-    cd tools/puppet/.framework-puppet/
-    ./install.sh
+    git submodules update --init
+    ./tools/puppet/.framework-puppet/install.sh
 ```
 
+To over-ride a framework-managed file in your project, replace with your own copy and remove the reference in tools/puppet/.gitignore
 
 

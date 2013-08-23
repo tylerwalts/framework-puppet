@@ -7,6 +7,7 @@
 #
 
 frameworkPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $frameworkPath # For when calling from other paths
 targetPuppetPath="$( cd "$frameworkPath/../" && pwd )"
 
 # Get version of this repository that we're working with, to tag copies.
@@ -92,7 +93,7 @@ symLink    modules/general/manifests/init.pp
 symLink    run_puppet_apply.sh
 symLink    update_library.sh
 
-gitStatus=$(cd ../ && git status Puppetfile | grep nothing | wc -l | tr -d ' ' )
+gitStatus=$(cd $targetPuppetPath && git status Puppetfile | grep nothing | wc -l | tr -d ' ' )
 if [[ "$gitStatus" != "1" ]]; then
     echo -e "\nAdding puppet templates and links to project repository...\n"
     $(cd ../ && git add .gitignore $copiedFileList)
