@@ -14,6 +14,13 @@ while [ "$1" != "" ]; do
             echo "Ensuring puppet librarian is run..."
             sudo ${basedir}/update_library.sh $basedir
             ;;
+        -f | --facter_override )
+            shift
+            echo "Overriding Facter..."
+            facterOptions="$1"
+            export $facterOptions
+            shift
+            ;;
         *) usagePrompt
             ;;
     esac
@@ -26,6 +33,6 @@ echo "Running puppet version: $puppetVersion"
 
 cd ${basedir}/manifests
 
-command="sudo puppet apply $puppetOpts --modulepath ${basedir}/modules/:${basedir}/lib/ ${basedir}/manifests/site.pp"
+command="puppet apply $puppetOpts --modulepath ${basedir}/modules/:${basedir}/lib/ ${basedir}/manifests/site.pp"
 echo -e "\nRunning Masterless Puppet using command: \n\t$command\n"
 $command
