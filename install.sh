@@ -30,7 +30,8 @@ function copyAndTag {
 function symLink {
     filename=$1
     osType="$(uname)"
-    if [[ $osType =~ "WIN" ]]; then
+    if [[ $osType == *WIN* || $osType == *MIN* ]]; then
+        # Look for CYGWIN or MINGW
         copyAndTag $filename
     else
         filenameOnly=$(basename "$filename")
