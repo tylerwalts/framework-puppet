@@ -94,10 +94,10 @@ symLink    modules/general/manifests/init.pp
 symLink    run_puppet_apply.sh
 symLink    update_library.sh
 
-gitStatus=$(cd $targetPuppetPath && git status Puppetfile | grep nothing | wc -l | tr -d ' ' )
+gitStatus=$(cd $targetPuppetPath && git status Puppetfile | grep 'working directory clean' | wc -l | tr -d ' ' )
 if [[ "$gitStatus" != "1" ]]; then
     echo -e "\nAdding puppet templates and links to project repository...\n"
-    $(cd ../ && git add .gitignore $copiedFileList)
+    $(cd $targetPuppetPath && git add .gitignore $copiedFileList)
     echo -e "Remember to review & commit git changes:\n\tcd ..\n\tgit status\n\tgit diff\n\tgit commit -m 'Added puppet framework artifacts'\n\tgit push\n"
 fi
 
