@@ -28,39 +28,42 @@ function copyAndTag {
 }
 function symLink {
     filename=$1
-    filenameOnly=$(basename "$filename")
-    relativePath="${filename%/*}"
-    if [[ "$filenameOnly" == "$relativePath" ]]; then
-        relativePath=""
+    osType="$(uname)"
+    if [[ $osType =~ "WIN" ]]; then
+        copyAndTag $filename
     else
-        pathCount="$( echo $relativePath | grep -o '/' | wc -l)"
-        relativePath=""
-        while [[ "$pathCount" != "-1" ]]; do
-            relativePath="${relativePath}../"
-            (( pathCount-- ))
-        done
-    fi
-    sourceFile="${relativePath}.framework-puppet/$filename"
-    destFile=$targetPuppetPath/$filename
-    if [[ -h $destFile ]]; then
-        echo "- Updating symlink: $filename"
-        rm $destFile
-        ln -s $sourceFile $destFile
-    elif [[ -e $destFile ]]; then
-        # If existing target is a file, skip it, means project has customized it.
-        echo "* Skipping existing file in place of symlink (customized for project): $destFile"
-    else
-        echo "Linking: $filename"
-        ln -s $sourceFile $destFile
-        # Add to .gitignore : Every new checkout will need to run this script.
-        [[ "$(grep $filename $targetPuppetPath/.gitignore)" == "" ]] && echo "$filename" >> $targetPuppetPath/.gitignore
+        filenameOnly=$(basename "$filename")
+        relativePath="${filename%/*}"
+        if [[ "$filenameOnly" == "$relativePath" ]]; then
+            relativePath=""
+        else
+            pathCount="$( echo $relativePath | grep -o '/' | wc -l)"
+            relativePath=""
+            while [[ "$pathCount" != "-1" ]]; do
+                relativePath="${relativePath}../"
+                (( pathCount-- ))
+            done
+        fi
+        sourceFile="${relativePath}.framework-puppet/$filename"
+        destFile=$targetPuppetPath/$filename
+        if [[ -h $destFile ]]; then
+            echo "- Updating symlink: $filename"
+            rm $destFile
+            ln -s $sourceFile $destFile
+        elif [[ -e $destFile ]]; then
+            echo "* Skipping existing file in place of symlink (customized for project): $destFile"
+        else
+            echo "Linking: $filename"
+            ln -s $sourceFile $destFile
+            [[ "$(grep $filename $targetPuppetPath/.gitignore)" == "" ]] && echo "$filename" >> $targetPuppetPath/.gitignore
+        fi
     fi
 }
 
 echo "Installing puppet framework into project repository...
-    Note:
+    Notes:
         - Files which the project will want to customize are copied to the project path.
-        - Files which should remain unchanged and common between projects are symlinked.
+        - Files which should remain unchanged and common between projects are symlinked on Mac/Linux, copied and .gitignored on Windows.
 "
 
 # Create directory structure
