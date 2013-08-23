@@ -24,7 +24,7 @@ function copyAndTag {
         command="cp $sourceFile $destFile"
         $command
         echo "#$frameworkSource" >> $destFile
-        copiedFileList=" $filename"
+        copiedFileList=" $copiedFileList $filename "
     fi
 }
 function symLink {
@@ -57,7 +57,9 @@ function symLink {
         else
             echo "Linking: $filename"
             ln -s $sourceFile $destFile
-            [[ "$(grep $filename $targetPuppetPath/.gitignore)" == "" ]] && echo "$filename" >> $targetPuppetPath/.gitignore
+            if [[ ! -e $targetPuppetPath/.gitignore || "$(grep $filename $targetPuppetPath/.gitignore)" == "" ]];then
+                echo "$filename" >> $targetPuppetPath/.gitignore
+            fi
         fi
     fi
 }
