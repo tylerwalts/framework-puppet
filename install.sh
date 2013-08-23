@@ -57,7 +57,7 @@ function symLink {
         else
             echo "Linking: $filename"
             ln -s $sourceFile $destFile
-            if [[ ! -e $targetPuppetPath/.gitignore || "$(grep $filename $targetPuppetPath/.gitignore)" == "" ]];then
+            if [[ "$(grep $filename $targetPuppetPath/.gitignore)" == "" ]];then
                 echo "$filename" >> $targetPuppetPath/.gitignore
             fi
         fi
@@ -77,7 +77,7 @@ mkdir -p $targetPuppetPath/lib \
     $targetPuppetPath/manifests/config/roles \
     $targetPuppetPath/modules/general/manifests
 
-[[ "$(grep 'maintained' $targetPuppetPath/.gitignore)" == "" ]] && \
+[[ ! -e $targetPuppetPath/.gitignore || "$(grep 'maintained' $targetPuppetPath/.gitignore)" == "" ]] && \
     echo "# These are maintained by the puppet framework" >> $targetPuppetPath/.gitignore
 [[ "$(grep -e '^lib$' $targetPuppetPath/.gitignore)" == "" ]] && \
     echo "lib" >> $targetPuppetPath/.gitignore
