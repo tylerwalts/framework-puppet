@@ -33,10 +33,10 @@ fi
 cd $PUPPET_DIR
 if [ -f $PUPPET_DIR/.librarian ]; then
     echo "Installing librarian..."
-    command="librarian-puppet update --path ./lib --verbose"
+    command="librarian-puppet update --path ./lib"
 else
     echo "Updating puppet lib with librarian"
-    command="librarian-puppet install --path ./lib --verbose"
+    command="librarian-puppet install --path ./lib"
 fi
 echo "Running command: $command"
 $command
