@@ -9,7 +9,7 @@ Run this each time new code is checked out to install and/or update the framewor
 
 ```bash
     # From the root of your project repository:
-    git submodules update --init
+    git submodule update --init
     ./tools/puppet/.framework-puppet/install.sh
 ```
 
