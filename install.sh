@@ -15,16 +15,19 @@ projectPath="$( cd "$frameworkPath/../../../" && pwd )"
 # Assumes this was installed using the sprint-zero framework
 frameworkSource="$(cat ../../../.git/modules/tools/puppet/.framework-puppet/HEAD) on $(date +%Y-%m-%d_%H%M)"
 function copyAndTag {
-    filename=$1
-    sourceFile=$frameworkPath/$filename
-    destFile=$targetPuppetPath/$filename
+    local filename=$1
+    local skipTagging=$2
+    local sourceFile=$frameworkPath/$filename
+    local destFile=$targetPuppetPath/$filename
     if [[ -f $destFile ]]; then
             echo "* Skipping existing template: $destFile"
     else
         echo "Copying: $filename"
         command="cp $sourceFile $destFile"
         $command
-        echo "#$frameworkSource" >> $destFile
+        if [[ "$skipTagging" != "true" ]]; then 
+          echo "#$frameworkSource" >> $destFile
+        fi
         copiedFileList=" $copiedFileList $filename "
     fi
 }
@@ -85,10 +88,10 @@ mkdir -p $targetPuppetPath/lib \
 
 copyAndTag Puppetfile
 symLink    manifests/config/common.json
-copyAndTag manifests/config/domains/example.json
-copyAndTag manifests/config/hosts/example.json
-copyAndTag manifests/config/project.json
-copyAndTag manifests/config/roles/example.json
+copyAndTag manifests/config/domains/example.json true
+copyAndTag manifests/config/hosts/example.json true
+copyAndTag manifests/config/project.json true
+copyAndTag manifests/config/roles/example.json true
 copyAndTag manifests/defines.pp
 symLink    manifests/hiera.yaml
 symLink    manifests/site.pp
