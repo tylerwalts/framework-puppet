@@ -9,6 +9,7 @@
 frameworkPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $frameworkPath # For when calling from other paths
 targetPuppetPath="$( cd "$frameworkPath/../" && pwd )"
+projectPath="$( cd "$frameworkPath/../../../" && pwd )"
 
 # Get version of this repository that we're working with, to tag copies.
 # Assumes this was installed using the sprint-zero framework
@@ -96,9 +97,14 @@ symLink    modules/general/manifests/init.pp
 symLink    run_puppet_apply.sh
 symLink    update_library.sh
 
+echo -e "Updating project's README.md..."
+[[ ! -e $projectPath/README.md \
+    || "$(grep -e '^Puppet Framework:$' $projectPath/README.md)" == "" ]] \
+        && cat $frameworkPath/README.md >> $projectPath/README.md
+
 gitStatus=$(cd $targetPuppetPath && git status Puppetfile | grep 'working directory clean' | wc -l | tr -d ' ' )
 if [[ "$gitStatus" != "1" ]]; then
-    echo -e "\nAdding puppet templates and links to project repository...\n"
+    echo -e "Adding puppet templates and links to project repository...\n"
     $(cd $targetPuppetPath && git add .gitignore $copiedFileList)
     echo -e "Remember to review & commit git changes:\n\tcd ..\n\tgit status\n\tgit diff\n\tgit commit -m 'Added puppet framework artifacts'\n\tgit push\n"
 fi

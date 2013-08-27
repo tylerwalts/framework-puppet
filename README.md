@@ -1,11 +1,11 @@
-framework-puppet
-================
+Puppet Framework:
+=================
 
 This is a framework for developing projects using puppet.
 
-It will initially get called by the sprint-zero installer, and will get installed as a submodule in your project's repository at `tools/puppet/.framework-puppet`.
+It initially gets installed by the sprint-zero installer, and will get installed as a submodule in your project's repository at `tools/puppet/.framework-puppet`.
 
-Run this each time new code is checked out to update the framework:
+Run this each time new code is checked out to install and/or update the framework:
 
 ```bash
     # From the root of your project repository:
