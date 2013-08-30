@@ -1,7 +1,8 @@
 {
   "classes":[
-    // Put project-specific classes here
+    // Put project-specific classes here, exa:
+    //  "firewall_patterns::web",
+    //  "firewall_patterns::app"
   ]
-
   // Put class parameters here
 }

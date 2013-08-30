@@ -1,0 +1,3 @@
+class firewall_patterns {
+
+}

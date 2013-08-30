@@ -79,7 +79,8 @@ mkdir -p $targetPuppetPath/lib \
     $targetPuppetPath/manifests/config/domains \
     $targetPuppetPath/manifests/config/hosts \
     $targetPuppetPath/manifests/config/roles \
-    $targetPuppetPath/modules/general/manifests
+    $targetPuppetPath/modules/general/manifests \
+    $targetPuppetPath/modules/firewall_patterns/manifests
 
 [[ ! -e $targetPuppetPath/.gitignore || "$(grep 'maintained' $targetPuppetPath/.gitignore)" == "" ]] && \
     echo "# These are maintained by the puppet framework" >> $targetPuppetPath/.gitignore
@@ -99,7 +100,12 @@ symLink    manifests/globals.pp
 symLink    modules/general/manifests/init.pp
 symLink    run_puppet_apply.sh
 symLink    update_library.sh
-
+symLink    modules/firewall_patterns/manifests/app.pp
+symLink    modules/firewall_patterns/manifests/init.pp
+symLink    modules/firewall_patterns/manifests/post.pp
+symLink    modules/firewall_patterns/manifests/pre.pp
+symLink    modules/firewall_patterns/manifests/web.pp
+ 
 echo -e "Updating project's README.md..."
 [[ ! -e $projectPath/README.md \
     || "$(grep -e '^Puppet Framework:$' $projectPath/README.md)" == "" ]] \

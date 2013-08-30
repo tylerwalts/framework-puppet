@@ -4,6 +4,7 @@ forge "http://forge.puppetlabs.com"
 
 # Most projects need the stdlib module from puppetlabs
 mod "puppetlabs/stdlib"
+mod "puppetlabs/firewall"
 
 # For github sources, use the following syntax:
 #mod "example", :git => "git://github.com/accountName/puppet-example.git"

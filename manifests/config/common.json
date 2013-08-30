@@ -2,8 +2,10 @@
 // Avoid customizing this file, and use the project, domain and hosts config.
 {
   "classes":[
-    "general"
+    "general",
+    "firewall",
+    "firewall_patterns::pre",
+    "firewall_patterns::post"
   ],
-
   "general::ensure":"latest"
 }
