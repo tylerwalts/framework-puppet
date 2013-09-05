@@ -96,6 +96,7 @@ copyAndTag manifests/defines.pp
 symLink    manifests/hiera.yaml
 symLink    manifests/site.pp
 symLink    manifests/globals.pp
+copyAndTag manifests/globals-project.pp
 symLink    modules/general/manifests/init.pp
 symLink    run_puppet_apply.sh
 symLink    update_library.sh
