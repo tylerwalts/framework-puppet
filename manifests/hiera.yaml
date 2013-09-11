@@ -1,14 +1,16 @@
 ---
 :hierarchy:
-    - "hosts/%{::fqdn}"
-    - "roles/%{::hostname}"
-    - "domains/%{::domain}"
-    - project
-    - common
+  - "hosts/%{::fqdn}"
+  - "roles/%{::hostname}"
+  - "domains/%{::domain}"
+  - project
+  - common
 
 :backends:
-    - json
+  - yaml 
+  - json
 
-:json:
-    :datadir: "%{::puppet_cwd}/manifests/config"
+:json: &data_dir
+  :datadir: "%{::puppet_cwd}/manifests/config"
 
+:yaml: *data_dir
