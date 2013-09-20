@@ -91,7 +91,7 @@ mkdir -p $targetPuppetFolder/lib \
     echo "lib" >> $targetPuppetFolder/.gitignore
 
 copyAndTag Puppetfile
-copyAndTag manifests/config/common.json
+copyAndTag manifests/config/common.json true
 copyAndTag manifests/config/domains/example.json true
 copyAndTag manifests/config/hosts/example.json true
 copyAndTag manifests/config/project.json true
