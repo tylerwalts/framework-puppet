@@ -14,15 +14,24 @@ After using this framework to install an initial puppet framework, please do not
 Some files are are intended as starters for the project to edit, and will not be tagged with puppet-framework-managed comments.
 
 
-How to Use:
-===========
+How to Install the Framework:
+=============================
+(If you are reading this file from your project repository, it is already installed)
 
-- Checkout this repository and cd to it
-- *To Install*:  `install.sh </path/to/my/project/repo>`
-- *To Upgrade*:  `install.sh -u </path/to/my/project/repo>`
+- Checkout this framework repository and cd to it
+- `install.sh </path/to/my/project/repo>`
 
-How to Test:
-============
+
+How to Install the Framework:
+=============================
+- Checkout the framework repository (https://github.com/tylerwalts/framework-puppet/) and cd to it
+- `install.sh -u </path/to/my/project/repo>`
+- Review the changes to your project repository
+- Commit changes to project repository
+
+
+How to Use for Project:
+=======================
 
 - This works best if also using the framework-vagrant:
     https://github.com/tylerwalts/framework-vagrant
