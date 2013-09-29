@@ -64,7 +64,7 @@ function copyAndTag {
     else
         echo "Copying: $filename"
         # Make sure this script can write to the target file
-        [[ ! -w $destFile ]] && chmod u+w $destFile
+        [[ -f $destFile && ! -w $destFile ]] && chmod u+w $destFile
         command="cp $sourceFile $destFile"
         $command
         if [[ "$skipTagging" != "true" ]]; then 
@@ -106,14 +106,14 @@ mkdir -p $targetPuppetFolder/lib \
 copyForProject Puppetfile
 copyForProject manifests/config/project.json true
 copyForProject modules/general/manifests/init.pp
+copyForProject manifests/defines.pp
+copyForProject manifests/globals-project.pp
 
 # Framework files
 copyAndTag manifests/config/common.json true
-copyAndTag manifests/defines.pp
 copyAndTag manifests/hiera.yaml
 copyAndTag manifests/site.pp
 copyAndTag manifests/globals.pp
-copyAndTag manifests/globals-project.pp
 copyAndTag run_puppet_apply.sh
 copyAndTag update_library.sh
 copyAndTag README.md
