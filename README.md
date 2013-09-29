@@ -22,7 +22,7 @@ How to Install the Framework:
 - `install.sh </path/to/my/project/repo>`
 
 
-How to Install the Framework:
+How to Update the Framework:
 =============================
 - Checkout the framework repository (https://github.com/tylerwalts/framework-puppet/) and cd to it
 - `install.sh -u </path/to/my/project/repo>`

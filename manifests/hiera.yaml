@@ -7,10 +7,10 @@
   - common
 
 :backends:
-  - yaml 
+  - yaml
   - json
 
 :json: &data_dir
-  :datadir: "%{::puppet_cwd}/manifests/config"
+  :datadir: "%{::hiera_config}/"
 
 :yaml: *data_dir

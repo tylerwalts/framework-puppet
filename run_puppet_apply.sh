@@ -31,8 +31,10 @@ echo "Running puppet version: $puppetVersion"
 [[ $puppetVersion == 2* ]] && cp ${basedir}/manifests/hiera.yaml /etc/puppet/
 [[ $puppetVersion == 3* ]] && puppetOpts="--hiera_config ${basedir}/manifests/hiera.yaml"
 
-cd ${basedir}/manifests
+# Hiera needs to know where to find the config data, via facter
+export FACTER_hiera_config="$basedir/manifests/config"
 
+cd ${basedir}/manifests
 command="puppet apply $puppetOpts --modulepath ${basedir}/modules/:${basedir}/lib/ ${basedir}/manifests/site.pp"
 echo -e "\nRunning Masterless Puppet using command: \n\t$command\n"
 $command
