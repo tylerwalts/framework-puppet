@@ -12,7 +12,7 @@ while [ "$1" != "" ]; do
         -l | --librarian )
             shift
             echo "Ensuring puppet librarian is run..."
-            sudo ${basedir}/update_library.sh $basedir
+            ${basedir}/update_library.sh $basedir
             ;;
         -f | --facter_override )
             shift
