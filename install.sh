@@ -99,8 +99,8 @@ mkdir -p $targetPuppetFolder/lib \
     $targetPuppetFolder/modules/general/manifests  
 
 # Prevent the puppet-librarian- managed modules from getting into git
-[[ ! -e $targetPuppetFolder/.gitignore || "$(grep -e '^lib$' $targetPuppetFolder/.gitignore)" == "" ]] && \
-    echo "lib" >> $targetPuppetFolder/.gitignore
+[[ ! -e $targetPuppetFolder/lib/.gitignore || "$(grep  'gitignore' $targetPuppetFolder/lib/.gitignore)" == "" ]] && \
+    echo "!.gitignore" >> $targetPuppetFolder/lib/.gitignore
 
 # Project starter files
 copyForProject Puppetfile
