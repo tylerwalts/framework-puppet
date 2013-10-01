@@ -16,8 +16,8 @@ while [ "$1" != "" ]; do
             ;;
         -f | --facter_override )
             shift
-            echo "Overriding Facter..."
             facterOptions="$1"
+            echo "Overriding Facter with: $facterOptions"
             export $facterOptions
             shift
             ;;
