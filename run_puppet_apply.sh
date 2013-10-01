@@ -22,6 +22,7 @@ while [ "$1" != "" ]; do
             shift
             ;;
         *) usagePrompt
+            shift
             ;;
     esac
 done
