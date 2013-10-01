@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Directory in which librarian-puppet should manage its modules directory
-PUPPET_DIR=/vagrant/tools/puppet/
+PUPPET_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 [[ "$1" != "" ]] && PUPPET_DIR=$1
 
 $(which git > /dev/null 2>&1)
@@ -25,12 +25,23 @@ if [ "$FOUND_GIT" -ne '0' ]; then
     echo 'No package installer available. You may need to install git manually.'
   fi
 fi
+cd $PUPPET_DIR
 
 # Ensure the puppet librarian gem is installed.
-[[ "$(gem search -i librarian-puppet)" == "false" ]] && gem install librarian-puppet --no-ri --no-rdoc
+if [[ "$(gem search -i librarian-puppet)" == "false" ]]; then
+  gem install librarian-puppet --no-ri --no-rdoc
+  return=$?
+  # If the existing/default gem source is bad/old, then use rubygems.
+  # TODO: refactor this to gem search first, and be >= 0.9.10
+  libVersion="$(gem search librarian-puppet | grep '0.9.10')"
+  if [[ "$return" != "0" || "$libVersion" == "" ]]; then
+    gem install bundler
+    echo -e "source 'https://rubygems.org'\ngem 'librarian-puppet'" > Gemfile
+    bundle install
+  fi
+fi
 
 # Install or update the puppet module library
-cd $PUPPET_DIR
 if [ -f $PUPPET_DIR/.librarian ]; then
     echo "Installing librarian..."
     command="librarian-puppet update --path ./lib"
