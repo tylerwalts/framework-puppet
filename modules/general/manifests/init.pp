@@ -15,8 +15,6 @@ class general ( $ensure = 'latest' ){
         'curl'
     ]
 
-    package { $packages:
-        ensure    => $ensure,
-    }
+    ensure_packages($packages)
 
 }
