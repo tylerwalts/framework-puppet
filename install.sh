@@ -111,7 +111,7 @@ copyForProject manifests/globals-project.pp
 
 # Framework files
 copyAndTag manifests/config/common.json true
-copyAndTag manifests/hiera.yaml
+copyAndTag manifests/hiera.yaml true
 copyAndTag manifests/site.pp
 copyAndTag manifests/globals.pp
 copyAndTag run_puppet_apply.sh
