@@ -4,6 +4,13 @@
 PUPPET_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 [[ "$1" != "" ]] && PUPPET_DIR=$1
 
+if [[ -f $PUPPET_DIR/update_library.pre.sh ]]; then
+    echo "Running Pre Hook..." 
+    # Create project-specific dependencies in this pre hook file.  For example, if using a private
+    # git repository as a puppet module source:  https://gist.github.com/tylerwalts/7127099
+    source $PUPPET_DIR/update_library.pre.sh
+fi
+
 $(which git > /dev/null 2>&1)
 FOUND_GIT=$?
 if [ "$FOUND_GIT" -ne '0' ]; then
