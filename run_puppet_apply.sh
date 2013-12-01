@@ -2,9 +2,13 @@
 [[ "$EUID" != "0" ]] && echo -e "\nError:\n\t**Run this script as root or sudo.\n" && exit 1
 basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+function log  {
+    echo -e "[$(date "+%Y-%m-%dT%H:%M:%SZ%z")] $1"
+}
+
 
 function usagePrompt {
-    echo -e "
+    log "
     run_puppet_apply.sh [options]
 
     -l | --librarian      Run Puppet Librarian to update modules
@@ -14,24 +18,95 @@ function usagePrompt {
     "
 }
 
+###
+# Find Puppet
+# This will search for the puppet executable location in the current
+# path and some common installation paths.
+function findPuppet {
+    # Check the path.  This is not always same as user, when using sudo
+    puppetExec="$(which puppet)"
+    if [[ "$puppetExec" == "" ]]; then
+        # Check common locations of puppet install
+        [[ -e "/opt/ruby/bin/puppet" ]] && puppetExec="/opt/ruby/bin/puppet"
+        [[ -e "/usr/bin/puppet" ]] && puppetExec="/usr/bin/puppet"
+    fi
+}
+
+function packageInstall {
+    packageName=$1
+    [[ "$packageName" == "" ]] && log "Missing packageInstall argument" && exit 1
+    log "Attempting to install $packageName..."
+    $(which apt-get > /dev/null 2>&1)
+    foundApt=$?
+    $(which yum > /dev/null 2>&1)
+    foundYum=$?
+    if [ "${foundYum}" -eq '0' ]; then
+        log "Installing $packageName using yum..."
+        yum -q -y makecache
+        yum -q -y install $packageName
+    elif [ "${foundApt}" -eq '0' ]; then
+        log "Installing $packageName using apt-get..."
+        apt-get -q -y update
+        apt-get -q -y install $packageName
+    else
+        log "No package installer available. You may need to install $packageName manually or modify this script."
+        exit 1
+    fi
+}
+
+###
+# Upgrade Puppet
+# If the default repository does not include puppet
+# version >= 3.x then this will use the puppetlabs repo.
+function upgradePuppet {
+    log "Upgrading puppet from version $(puppet --version) to latest from puppetlabs..."
+    $(which rpm > /dev/null 2>&1)
+    foundRPM=$?
+    $(which dpkg > /dev/null 2>&1)
+    foundDPKG=$?
+    if [ "${foundDPKG}" -eq '0' ]; then
+        log "Upgrading puppet using DPKG..."
+        wget http://apt.puppetlabs.com/puppetlabs-release-precise.deb -O /tmp/puppetlabs-release-precise.deb
+        dpkg -i /tmp/puppetlabs-release-precise.deb
+        sudo apt-get update
+    elif [ "${foundRPM}" -eq '0' ]; then
+        log "Upgrading puppet using RPM..."
+        rpm -ivh http://yum.puppetlabs.com/el/6/products/i386/puppetlabs-release-6-7.noarch.rpm
+    else
+        log "No package system detected."
+        exit 1
+    fi
+    packageInstall "puppet facter hiera rubygems"
+}
+
+function configHiera {
+    puppetVersion="$($puppetExec --version)"
+    [[ $puppetVersion == 2* ]] && cp ${basedir}/manifests/hiera.yaml /etc/puppet/
+    [[ $puppetVersion == 3* ]] && puppetOpts="--hiera_config ${basedir}/manifests/hiera.yaml"
+
+    # Hiera needs to know where to find the config data, via facter
+    export FACTER_hiera_config="$basedir/manifests/config"
+}
+
+
 while [ "$1" != "" ]; do
     case $1 in
         -l | --librarian )
             shift
-            echo "Ensuring puppet librarian is run..."
+            log "Ensuring puppet librarian is run..."
             ${basedir}/update_library.sh $basedir
             ;;
         -f | --facter_override )
             shift
             facterOptions="$1"
-            echo "Overriding Facter with: $facterOptions"
+            log "Overriding Facter with: $facterOptions"
             export $facterOptions
             shift
             ;;
         -n | --noop )
             shift
             noopArg=" --noop "
-            echo "Using noop (no operation) run mode - no changes will be realized"
+            log "Using noop (no operation) run mode - no changes will be realized"
             shift
             ;;
         *) usagePrompt
@@ -41,15 +116,13 @@ while [ "$1" != "" ]; do
     esac
 done
 
-puppetVersion="$(puppet --version)"
-echo "Running puppet version: $puppetVersion"
-[[ $puppetVersion == 2* ]] && cp ${basedir}/manifests/hiera.yaml /etc/puppet/
-[[ $puppetVersion == 3* ]] && puppetOpts="--hiera_config ${basedir}/manifests/hiera.yaml"
-
-# Hiera needs to know where to find the config data, via facter
-export FACTER_hiera_config="$basedir/manifests/config"
+findPuppet
+[[ "$puppetExec" == "" ]] && packageInstall puppet
+[[ "$(puppet --version)" == 2* ]] && upgradePuppet
+configHiera
 
 cd ${basedir}/manifests
-command="puppet apply $puppetOpts $noopArg --modulepath ${basedir}/modules/:${basedir}/lib/ ${basedir}/manifests/site.pp"
-echo -e "\nRunning Masterless Puppet using command: \n\t$command\n"
+command="$puppetExec apply $puppetOpts $noopArg --modulepath ${basedir}/modules/:${basedir}/lib/ ${basedir}/manifests/site.pp"
+log "\nRunning Masterless Puppet using command: \n\t$command\n"
 $command
+
