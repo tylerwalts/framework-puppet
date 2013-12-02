@@ -1,11 +1,14 @@
 #!/bin/bash
+###
+# Run Puppet Apply
+# This is a wrapper script around running masterless puppet.
+###
 [[ "$EUID" != "0" ]] && echo -e "\nError:\n\t**Run this script as root or sudo.\n" && exit 1
 basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 function log  {
     echo -e "[$(date "+%Y-%m-%dT%H:%M:%SZ%z")] $1"
 }
-
 
 function usagePrompt {
     log "
@@ -20,7 +23,7 @@ function usagePrompt {
 
 ###
 # Find Puppet
-# This will search for the puppet executable location in the current
+# Searches for the puppet executable location in the current
 # path and some common installation paths.
 function findPuppet {
     # Check the path.  This is not always same as user, when using sudo
@@ -32,25 +35,34 @@ function findPuppet {
     fi
 }
 
+###
+# Package Install
+# Installs a package name to install using either apt-get or yum
+# @param packageName
 function packageInstall {
     packageName=$1
     [[ "$packageName" == "" ]] && log "Missing packageInstall argument" && exit 1
-    log "Attempting to install $packageName..."
-    $(which apt-get > /dev/null 2>&1)
-    foundApt=$?
-    $(which yum > /dev/null 2>&1)
-    foundYum=$?
-    if [ "${foundYum}" -eq '0' ]; then
-        log "Installing $packageName using yum..."
-        yum -q -y makecache
-        yum -q -y install $packageName
-    elif [ "${foundApt}" -eq '0' ]; then
-        log "Installing $packageName using apt-get..."
-        apt-get -q -y update
-        apt-get -q -y install $packageName
+    packageExec="$(which $packageName)"
+    if [[ "$packageExec" == "" ]]; then
+        log "Attempting to install $packageName..."
+        $(which apt-get > /dev/null 2>&1)
+        foundApt=$?
+        $(which yum > /dev/null 2>&1)
+        foundYum=$?
+        if [ "${foundYum}" -eq '0' ]; then
+            log "Installing $packageName using yum..."
+            yum -q -y makecache
+            yum -q -y install $packageName
+        elif [ "${foundApt}" -eq '0' ]; then
+            log "Installing $packageName using apt-get..."
+            apt-get -q -y update
+            apt-get -q -y install $packageName
+        else
+            log "No package installer available. You may need to install $packageName manually or modify this script."
+            exit 1
+        fi
     else
-        log "No package installer available. You may need to install $packageName manually or modify this script."
-        exit 1
+        log "Package $packageName is present at $packageExec."
     fi
 }
 
@@ -79,22 +91,66 @@ function upgradePuppet {
     packageInstall "puppet facter hiera rubygems"
 }
 
+###
+# Update Library
+# Runs the puppet librarian to fetch/update non-project modules
+#
+function updateLibrary {
+    log "Ensuring puppet librarian is run..."
+    cd $basedir
+    packageInstall git
+    if [[ -f $basedir/update_library.pre.sh ]]; then
+        log "Running Pre Hook..."
+        # Create project-specific dependencies in this pre hook file.  For example, if using a private
+        # git repository as a puppet module source:  https://gist.github.com/tylerwalts/7127099
+        source $basedir/update_library.pre.sh
+    fi
+    # Ensure the puppet librarian gem is installed.
+    if [[ "$(gem search -i librarian-puppet)" == "false" ]]; then
+      gem install librarian-puppet --no-ri --no-rdoc
+      return=$?
+      # If the existing/default gem source is bad/old, then use rubygems.
+      # TODO: refactor this to gem search first, and be >= 0.9.10
+      libVersion="$(gem search librarian-puppet | grep '0.9.10')"
+      if [[ "$return" != "0" || "$libVersion" == "" ]]; then
+        gem install bundler
+        echo -e "source 'https://rubygems.org'\ngem 'librarian-puppet'" > Gemfile
+        bundle install
+      fi
+    fi
+    # Install or update the puppet module library
+    if [ -f $basedir/.librarian ]; then
+        log "Installing librarian..."
+        command="librarian-puppet update --path ./lib"
+    else
+        log "Updating puppet lib with librarian"
+        command="librarian-puppet install --path ./lib"
+    fi
+    log "Running librarian command: $command"
+    $command
+}
+
+###
+# Configure Hiera
+# Checks puppet version and sets up hiera configuration accordingly
 function configHiera {
+    [[ "$puppetExec" == "" ]] && findPuppet
     puppetVersion="$($puppetExec --version)"
     [[ $puppetVersion == 2* ]] && cp ${basedir}/manifests/hiera.yaml /etc/puppet/
     [[ $puppetVersion == 3* ]] && puppetOpts="--hiera_config ${basedir}/manifests/hiera.yaml"
 
     # Hiera needs to know where to find the config data, via facter
-    export FACTER_hiera_config="$basedir/manifests/config"
+    export FACTER_hiera_config="${basedir}/manifests/config"
 }
 
-
+##
+# Handle Args
+#
 while [ "$1" != "" ]; do
     case $1 in
         -l | --librarian )
             shift
-            log "Ensuring puppet librarian is run..."
-            ${basedir}/update_library.sh $basedir
+            updateLibrary
             ;;
         -f | --facter_override )
             shift
@@ -116,6 +172,9 @@ while [ "$1" != "" ]; do
     esac
 done
 
+###
+# Main
+#
 findPuppet
 [[ "$puppetExec" == "" ]] && packageInstall puppet
 [[ "$(puppet --version)" == 2* ]] && upgradePuppet
