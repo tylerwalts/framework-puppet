@@ -35,7 +35,7 @@ done
 
 targetPuppetFolder="$targetProjectFolder/tools/puppet"
 
-if [[ ! -d $targetProjectFolder ]]; then 
+if [[ ! -d $targetProjectFolder ]]; then
   echo "The target Vagrant of [$targetProjectFolder] installation path is invalid"
   exit 127
 fi
@@ -67,7 +67,7 @@ function copyAndTag {
         [[ -f $destFile && ! -w $destFile ]] && chmod u+w $destFile
         command="cp $sourceFile $destFile"
         $command
-        if [[ "$skipTagging" != "true" ]]; then 
+        if [[ "$skipTagging" != "true" ]]; then
           echo "$tagContent" >> $destFile
         fi
         # Remove user write bit for all files to help make clear this is managed by framework
@@ -95,8 +95,9 @@ echo "Installing puppet framework into project repository... "
 
 # Create directory structure
 mkdir -p $targetPuppetFolder/lib \
-    $targetPuppetFolder/manifests/config/{domains,hosts,roles,manifests} \
-    $targetPuppetFolder/modules/general/manifests  
+    $targetPuppetFolder/manifests/config/{domains,roles,manifests} \
+    $targetPuppetFolder/modules/general/manifests \
+    $targetPuppetFolder/modules/project_firewall/manifests
 
 # Prevent the puppet-librarian- managed modules from getting into git
 [[ ! -e $targetPuppetFolder/lib/.gitignore || "$(grep  'gitignore' $targetPuppetFolder/lib/.gitignore)" == "" ]] && \
@@ -104,27 +105,26 @@ mkdir -p $targetPuppetFolder/lib \
 
 # Project starter files
 copyForProject Puppetfile
-copyForProject manifests/config/project.json true
 copyForProject modules/general/manifests/init.pp
+copyForProject modules/project_firewall/manifests/dev.pp
+copyForProject modules/project_firewall/manifests/init.pp
+copyForProject modules/project_firewall/manifests/post.pp
+copyForProject modules/project_firewall/manifests/pre.pp
 copyForProject manifests/defines.pp
 copyForProject manifests/globals-project.pp
 
 # Framework files
-copyAndTag manifests/config/common.json true
+copyAndTag manifests/config/common.yaml true
+copyAndTag manifests/config/domains/example.com.yaml true
+copyAndTag manifests/config/domains/vagrant.example.com.yaml true
+copyAndTag manifests/config/roles/dev.yaml true
 copyAndTag manifests/hiera.yaml true
 copyAndTag manifests/site.pp
 copyAndTag manifests/globals.pp
 copyAndTag run_puppet_apply.sh
-copyAndTag update_library.sh
 copyAndTag README.md
 
-    # TODO: put these examples in the readme instead of codebase
-    copyAndTag manifests/config/domains/example.json true
-    copyAndTag manifests/config/hosts/example.json true
-    copyAndTag manifests/config/roles/example.json true
-
 # TODO:  prompt for common stack components: (tomcat, mysql, apache, node.js, mongo)
-# - Add modules to Puppetfile and put entry in project.json
 
 echo -e "\nPuppet installation done."
 
