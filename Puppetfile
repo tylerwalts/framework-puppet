@@ -2,10 +2,14 @@
 # Edit this list and run the librarian update each time an external module is added.
 forge "http://forge.puppetlabs.com"
 
-# Most projects need the stdlib module from puppetlabs
+# Modules from the Puppetlabs Forge:
 mod "puppetlabs/stdlib"
+mod "bashtoni/timezone"
+mod "puppetlabs/firewall"
+mod "puppetlabs/apache"
 
-# For github sources, use the following syntax:
-#mod "example", :git => "git://github.com/accountName/puppet-example.git"
+# Modules from Git sources:
+mod "user_account",
+    :git => "git://github.com/tylerwalts/puppet-user_account.git"
 
 

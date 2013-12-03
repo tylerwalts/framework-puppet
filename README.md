@@ -1,18 +1,44 @@
 Puppet Framework:
 =================
 
-This is a framework for developing projects using puppet.
+This is a framework by convention for developing projects that use puppet.
 
-It initially gets installed by the sprint-zero installer, and will get installed as a submodule in your project's repository at `tools/puppet/.framework-puppet`.
+It is intended to be a tool to install and update puppet frameworks in one or more project repositories.
 
-Run this each time new code is checked out to install and/or update the framework:
+It will get installed to each project by convention at `tools/puppet/`
 
-```bash
-    # From the root of your project repository:
-    git submodules update --init
-    ./tools/puppet/.framework-puppet/install.sh
-```
+This makes it easier to create and troubleshoot puppet configuration and push out updates accross multiple projects.
 
-To over-ride a framework-managed file in your project, replace with your own copy and remove the reference in tools/puppet/.gitignore
+After using this framework to install an initial puppet framework, please do not edit a puppet-framework-managed file, but work with this puppet-framework project to edit it at the source.
+
+Some files are are intended as starters for the project to edit, and will not be tagged with puppet-framework-managed comments.
+
+
+How to Install the Framework:
+=============================
+(If you are reading this file from your project repository, it is already installed)
+
+- Checkout this framework repository and cd to it
+- `install.sh </path/to/my/project/repo>`
+
+
+How to Update the Framework:
+=============================
+- Checkout the framework repository (https://github.com/tylerwalts/framework-puppet/) and cd to it
+- `install.sh -u </path/to/my/project/repo>`
+- Review the changes to your project repository
+- Commit changes to project repository
+
+
+How to Use for Project:
+=======================
+
+- This works best if also using the framework-vagrant:
+    https://github.com/tylerwalts/framework-vagrant
+
+- `cd </path/to/my/project/repo>`
+- `vagrant up`
+
+- This should create a CentOS VM instance and run the puppet apply with the starter project files.
 
 
