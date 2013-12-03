@@ -1,0 +1,11 @@
+# This gets applied to any host under subdomain
+---
+  classes:
+    - "user_account::vagrant"
+    - "firewall"
+    - "project_firewall::pre"
+    - "project_firewall::post"
+    - "project_firewall::dev"
+  user_account::users:
+    - "vagrant"
+

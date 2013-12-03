@@ -42,27 +42,21 @@ function findPuppet {
 function packageInstall {
     packageName=$1
     [[ "$packageName" == "" ]] && log "Missing packageInstall argument" && exit 1
-    packageExec="$(which $packageName)"
-    if [[ "$packageExec" == "" ]]; then
-        log "Attempting to install $packageName..."
-        $(which apt-get > /dev/null 2>&1)
-        foundApt=$?
-        $(which yum > /dev/null 2>&1)
-        foundYum=$?
-        if [ "${foundYum}" -eq '0' ]; then
-            log "Installing $packageName using yum..."
-            yum -q -y makecache
-            yum -q -y install $packageName
-        elif [ "${foundApt}" -eq '0' ]; then
-            log "Installing $packageName using apt-get..."
-            apt-get -q -y update
-            apt-get -q -y install $packageName
-        else
-            log "No package installer available. You may need to install $packageName manually or modify this script."
-            exit 1
-        fi
+    log "Attempting to install $packageName..."
+    $(which apt-get > /dev/null 2>&1)
+    foundApt=$?
+    $(which yum > /dev/null 2>&1)
+    foundYum=$?
+    if [ "${foundYum}" -eq '0' ]; then
+        log "Installing $packageName using yum..."
+        yum install $packageName -y -q
+    elif [ "${foundApt}" -eq '0' ]; then
+        log "Installing $packageName using apt-get..."
+        apt-get -q -y update
+        apt-get -q -y install $packageName
     else
-        log "Package $packageName is present at $packageExec."
+        log "No package installer available. You may need to install $packageName manually or modify this script."
+        exit 1
     fi
 }
 
@@ -88,7 +82,7 @@ function upgradePuppet {
         log "No package system detected."
         exit 1
     fi
-    packageInstall "puppet facter hiera rubygems"
+    packageInstall puppet
 }
 
 ###
@@ -98,7 +92,7 @@ function upgradePuppet {
 function updateLibrary {
     log "Ensuring puppet librarian is run..."
     cd $basedir
-    packageInstall git
+    [[ "$(which git)" == "" ]] && packageInstall git
     if [[ -f $basedir/update_library.pre.sh ]]; then
         log "Running Pre Hook..."
         # Create project-specific dependencies in this pre hook file.  For example, if using a private
@@ -143,9 +137,13 @@ function configHiera {
     export FACTER_hiera_config="${basedir}/manifests/config"
 }
 
-##
+# Ensure puppet & dependencies are present
+findPuppet
+[[ "$puppetExec" == "" ]] && packageInstall puppet
+[[ "$(puppet --version)" == 2* ]] && upgradePuppet
+configHiera
+
 # Handle Args
-#
 while [ "$1" != "" ]; do
     case $1 in
         -l | --librarian )
@@ -172,14 +170,7 @@ while [ "$1" != "" ]; do
     esac
 done
 
-###
-# Main
-#
-findPuppet
-[[ "$puppetExec" == "" ]] && packageInstall puppet
-[[ "$(puppet --version)" == 2* ]] && upgradePuppet
-configHiera
-
+# Run Puppet Apply
 cd ${basedir}/manifests
 command="$puppetExec apply $puppetOpts $noopArg --modulepath ${basedir}/modules/:${basedir}/lib/ ${basedir}/manifests/site.pp"
 log "\nRunning Masterless Puppet using command: \n\t$command\n"

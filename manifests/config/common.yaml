@@ -1,0 +1,13 @@
+# This is intended to ensure common resource that we use on every project.
+# Avoid customizing this file.  Create new project-specific modules for
+# the project and add them in the appropriate domains/ scope.
+---
+  classes:
+    - "timezone"
+    - "user_account"
+  general::ensure: "latest"
+  timezone::timezone: "US/Central"
+  user_account::users:
+    - "root"
+
+
