@@ -42,3 +42,7 @@ How to Use for Project:
 - This should create a CentOS VM instance and run the puppet apply with the starter project files.
 
 
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/tylerwalts/framework-puppet/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
