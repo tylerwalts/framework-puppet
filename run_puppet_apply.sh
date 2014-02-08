@@ -83,6 +83,7 @@ function upgradePuppet {
         exit 1
     fi
     packageInstall puppet
+    gem update --system
 }
 
 ###
