@@ -82,8 +82,11 @@ function upgradePuppet {
         log "No package system detected."
         exit 1
     fi
+    # Install puppet from the puppetlabs repo
     packageInstall puppet
     gem update --system
+    # Get the location of the newest puppet and use this moving forward
+    findPuppet
 }
 
 ###
