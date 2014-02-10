@@ -82,6 +82,7 @@ function upgradePuppet {
         log "No package system detected."
         exit 1
     fi
+    # Install puppet from the puppetlabs repo
     packageInstall puppet
 }
 
@@ -101,11 +102,11 @@ function updateLibrary {
     fi
     # Ensure the puppet librarian gem is installed.
     if [[ "$(gem search -i librarian-puppet)" == "false" ]]; then
-      gem install librarian-puppet --no-ri --no-rdoc
+      gem install librarian-puppet -v 0.9.11 --no-ri --no-rdoc
       return=$?
       # If the existing/default gem source is bad/old, then use rubygems.
-      # TODO: refactor this to gem search first, and be >= 0.9.10
-      libVersion="$(gem search librarian-puppet | grep '0.9.10')"
+      # TODO: refactor this to gem search first, and be >= 0.9.11
+      libVersion="$(gem search librarian-puppet | grep '0.9.11')"
       if [[ "$return" != "0" || "$libVersion" == "" ]]; then
         gem install bundler
         echo -e "source 'https://rubygems.org'\ngem 'librarian-puppet'" > Gemfile
