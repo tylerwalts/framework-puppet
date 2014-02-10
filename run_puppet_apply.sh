@@ -84,9 +84,6 @@ function upgradePuppet {
     fi
     # Install puppet from the puppetlabs repo
     packageInstall puppet
-    gem update --system
-    # Get the location of the newest puppet and use this moving forward
-    findPuppet
 }
 
 ###
@@ -105,24 +102,23 @@ function updateLibrary {
     fi
     # Ensure the puppet librarian gem is installed.
     if [[ "$(gem search -i librarian-puppet)" == "false" ]]; then
-      gem install librarian-puppet --no-ri --no-rdoc
+      gem install librarian-puppet -v 0.9.11 --no-ri --no-rdoc
       return=$?
-      # If the existing/default gem source is bad/old, then use rubygems.
-      # TODO: refactor this to gem search first, and be >= 0.9.10
-      libVersion="$(gem search librarian-puppet | grep '0.9.10')"
+      # If the existing/default gem source is bad/old, then use rubygems and bundler
+      libVersion="$(gem search librarian-puppet | grep '0.9.11')"
       if [[ "$return" != "0" || "$libVersion" == "" ]]; then
         gem install bundler
-        echo -e "source 'https://rubygems.org'\ngem 'librarian-puppet'" > Gemfile
+        echo -e "source 'https://rubygems.org'\ngem 'librarian-puppet', '0.9.11'" > Gemfile
         bundle install
       fi
     fi
     # Install or update the puppet module library
     if [ -f $basedir/.librarian ]; then
-        log "Installing librarian..."
-        command="librarian-puppet update --path ./lib"
+        log "Updating librarian..."
+        command="/usr/bin/librarian-puppet update --path ./lib"
     else
-        log "Updating puppet lib with librarian"
-        command="librarian-puppet install --path ./lib"
+        log "Installing puppet lib with librarian"
+        command="/usr/bin/librarian-puppet install --path ./lib"
     fi
     log "Running librarian command: $command"
     $command
