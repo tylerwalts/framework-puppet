@@ -6,7 +6,8 @@
     - "timezone"
     - "user_account"
   general::ensure: "latest"
-  timezone::timezone: "US/Central"
+  timezone::region: "US"
+  timezone::locality: "Central"
   user_account::users:
     - "root"
 
